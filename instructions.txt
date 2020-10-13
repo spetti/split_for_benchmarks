@@ -1,0 +1,146 @@
+Reproducing analysis of splitting algorithms' runtime 
+
+	Benchmarking runtime on individual families
+
+		Step 1: Gather data about each family in the multi-MSAs Pfam-A.seed and Pfam-A.full:
+			esl-alistat -1 <path-to-Pfam-A.seed> > Pfam-A.seed.stats
+			esl-alistat -1 <path-to-Pfam-A.full> > Pfam-A.full.stats
+
+		Step 2: Use esl-afetch to extract all individual MSA files from the multi-MSAs fam-A.seed and Pfam-A.full.
+
+		Step 3: Run create-profmark on each individual MSA with the time function: 
+			time create-profmark <alg-specific-command> -1 0.25 -2 0.50 --dev --noavg <output_location/MSA_name> <path-to-MSA> <path-to-uniprot>
+
+			If the MSA has fewer than 10000 sequences, we ran the above command on 2 cores and 8GB RAM. If the MSA has more than 10000 sequences, we ran than above command on 3 cores and 12GB RAM. The number of sequences in a family is given in fourth column of the table in the .stats file created in Step 1. 
+
+			The algorithm specific commands (<alg-specific-command>) are as follows:
+				Blue: '--blue'
+				Cobalt: '--cobalt'
+				Cluster: '--cluster'
+				Independent Selection: '--random --rp 0.70'
+
+			The --dev flag indicates (i) do not synthesize sequences and (ii) create a line in the .tbl file regardless of the size of the split produced
+
+			The --noavg flag indicates not to compute the average pid of the family.
+
+			The Jupyter notebook we use to create Figure (scatterplot) requires the following file structure and naming conventions on the output:
+				- The output of the time commands should be stored in files whose prefix is the splitting algorithm (blue, cobalt, cluster or random70) and whose suffix is ".times". There should be another file with the same name, but with the suffix ".names" in place of ".times" that contains the names of each family. The i^th set of times in the ".times" file should correspond to the i^th family name in the ".names" file. 
+				- It doesn't matter how many families per .times/.names file pair. Each family should appear in one .times/.names file pair. 
+
+	Benchmarking runtime on databases
+
+		Step 1: Run create-profmark on multi-MSA for the Pfam-A.seed and Pfam-A.full databases with the time function:
+			time create-profmark <alg-specific-command> -1 0.25 -2 0.50 --dev --noavg <output_location/database_name> <path-to-Pfam> <path-to-uniprot>
+
+		The fields of the above command are as described in the previous section.
+
+		For the seed database we ran the above command on 2 cores and 8GB RAM. We ran the command three times per algorithm and report the median runtime in the table.
+
+		For the full database we ran than above command on 3 cores and 12GB RAM. Due to the long runtime, we ran the command only once per algorithm (except blue) and reported the runtime in the table. There is no sense in running the blue algorithm on Pfam-A.full; it would take months.
+
+
+	Associated Figures:
+		- To produce Figure 2 and Figure S1 see Jupyter notebook compile_time_results.ipynb
+		- The values in the "seed" and "full" columns of Table 1 are the results of time command described under "Benchmarking runtime on databases." The remaining values in the "max" and "families >1 min" columns are computed in Jupyter notebook compile_time_results.ipynb.
+
+
+Reproducing success benchmarks
+
+	For the seed alignments, run:
+		create-profmark <alg-specific-command> -1 0.25 -2 0.50 --mintrain 10 --mintest 2 --dev <output_location/MSA_name> <path-to-MSA> <path-to-uniprot>
+
+	For the full alignments, run:
+		create-profmark <alg-specific-command> -1 0.25 -2 0.50 --mintrain 400 --mintest 20 --dev <output_location/MSA_name> <path-to-MSA> <path-to-uniprot>
+
+	The algorithm specific commands (<alg-specific-command>) are as follows:
+		Blue: '--blue -T 40'
+		Cobalt: '--cobalt -T 40'
+		Cluster: '--cluster'
+		Independent Selection: '--random --rp 0.70'
+
+	We require that the create-profmark command runs in at under 1 day for each family. One way to achieve this is to run the above commands on each individual MSA and specify a time limit of 1 day on the job. (The individual MSAs can be obtained as described in "Reproducing analysis of splitting algorithms' runtime>Benchmarking runtime on individual families>Step 2.") 
+
+	To avoid producing tens of thousands of jobs, we took a different approach. First, we ran create-profmark (with the above specifications) on the Pfam-A.seed multi-MSA. Since this runs in under a day, we know that it took well under a day for each the algorithms to split each seed family. For the Pfam full alignments, we used the -f flag of esl-afetch to split the multi-MSA Pfam-A.full into smaller multi-MSAs, so that the splitting algorithms can split the smaller multi-MSA in a day. All families with more than 10000 sequences were put into a single-MSA files and the splitting algorithms were run on them individually with a time limit of 1 day. This is also how Blue was run on all families with more 5000 sequences. The .tbl files for each algorithm were then concatenated. [See preprocess_full_MSAs.ipynb,split_for_pass_rate.py, and split_for_pass_rate_ind.py]
+           
+    If the family or families in the MSA had fewer than 10000 sequences, we ran the above command on 2 cores and 8GB RAM. If the family has more than 10000 sequences, we ran than above command on 3 cores and 12GB RAM. (To compute the number of sequences in a family see "Reproducing analysis of splitting algorithms' runtime>Benchmarking runtime on individual families>Step 1.")  
+
+
+    Associated Figures:
+    	- To produce Figures S4 and S5 see visualize_sizes.ipynb
+    	- To produce Figures 1, S2, and S3 see plot_success.ipynb
+
+
+
+Reproducing benchmarks of homology search methods
+
+	Step 1: Use create-profmark to split pfam data and synthesize positive and negative test sequences.
+	[See make_splits_to_benchmark.py]
+
+		For each splitting algorithm, run:
+
+		 	create-profmark <alg-specific-command> -1 0.25 -2 0.50 --mintrain 10 --mintest 2 --single --maxtest 10 --pid <output_location/output_prefix> <path-to-Pfam> <path-to-uniprot>
+
+		The algorithm specific commands (<alg-specific-command>) are as follows:
+			Blue: '--blue'
+			Blue40: '--blue -R 40'
+			Cobalt: '--cobalt'
+			Cobalt40: '--cobalt -R 40'
+			Cluster: '--cluster'
+			Independent Selection: '--random --rp 0.70'
+
+		The -R x flag runs the splitting algorithm x times and returns the split that maximizes |test set| * |training set| (before any down-sampling of the test set forced by the --maxtest flag) subject to the specified minimum sizes
+		
+		The -1 flag controls the maximum pid between a test and training sequence pair. 
+
+		The -2 flag controls the maximum pid between any training sequence pair.
+
+		The --pid flag writes the pid between training and test pairs to "<output_prefix>.pid". This flag is unnecessary for benchmarking, but is needed to produce Figure ?C.
+
+	Step 2: Make databases required by homology search algorithms. 
+	[See make_blast_db.py, make_diamond_db.py, AND HHBLITS TO BE ADDED]
+
+		For each split produced in Step 1, make the requisite databases. Set <benchmark-prefix> as what was specified as <output_location/output_prefix> in Step 1.
+
+		Diamond: diamond makedb --in <benchmark-prefix>.fa --db <benchmark-prefix>.fa
+
+		Blast: makeblastdb -in <benchmark-prefix>.fa -dbtype prot
+
+		HHBlits: COMING SOON??
+
+	Step 3: Use profmarks's perl scripts to run homology search algorithms on the synthetic sequences.
+	[See run_hom_methods.py]
+
+		For each split produced and each homology search method, run:
+
+			<path-to-profmark>/pmark-master.pl <path-to-homology-method-executable> <path-to-hmmer> <results-directory>/<method> <n-processors> <benchmark-prefix> <path-to-profmark>/<benchmark-script>
+
+		To use a split produced in Step 1, set <benchmark-prefix> as what was specified as <output_location/output_prefix> in Step 1.
+
+		The names of the benchmark scripts (<benchmark-script>) for each homology search method are as follows:
+			psiblast: 'x-psiblast+'
+			blast: 'x-fps-ncbiblast+'
+			hmmsearch: 'x-hmmsearch'
+			diamond: 'x-fps-diamond'
+			diamond-sensitive: 'x-fps-diamond-sen'
+
+		The number of processors can be specified based on the user's preference; we set it to 100. 
+
+	Step 4: Compute values for ROC plot and store them in a XMGRACE xydydy file.
+	[See get_roc_data.py]
+
+		For each split-homology benchmark produced in the previous step:
+
+			1. Concatenate the .out files in found in the corresponding <results-directory>/<method> directory and sort the resulting file, store as <results-directory>/<method>.cat 
+
+			2. Run <path-to-profmark>/rocplot <benchmark-prefix> <results-directory>/<method>.cat and save the results to <results-directory>/<method>.xy
+
+	Associated Figures:
+		- To produce Figure 3B, first run extract_common_successes.py to produce a XMGRACE xydydy file for each splitting algorithm-homology method pair that only includes data from families successfully split by each of Blue1, Cobalt1, Cluster and Independent Selection
+		- To produce Figures 3 and 4 see Jupyter notebook plot_method_benchmarks.ipynb
+
+
+
+
+
+
+	
