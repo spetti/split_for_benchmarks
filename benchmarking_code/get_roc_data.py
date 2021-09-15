@@ -7,8 +7,8 @@ import os
 algs=['blue1','cobalt1','cluster','random70','blue40','cobalt40']
 methods=['diamond', 'blast', 'hmmsearch','psiblast', 'diamond-sen']
 
-split_directory='/n/home01/spetti/spetti_space/benchmarks/splits/'
-methods_directory='/n/home01/spetti/spetti_space/benchmarks/'
+split_directory='/n/holylfs03/LABS/eddy_lab/home/spetti/split_for_benchmarks/benchmarking_data/benchmarks/splits/'
+methods_directory='/n/holylfs03/LABS/eddy_lab/home/spetti/split_for_benchmarks/benchmarking_data/benchmarks/'
 
 hmmer_path="/n/home01/spetti/hmmer"
 profmark_path=hmmer_path+"/profmark/"
