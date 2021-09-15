@@ -23,7 +23,7 @@ Reproducing analysis of splitting algorithms' runtime
 
 			The --noavg flag indicates not to compute the average pid of the family.
 
-			The Jupyter notebook we use to create Figure (scatterplot) requires the following file structure and naming conventions on the output:
+			The Jupyter notebook we use to create Figures 2 and S1 requires the following file structure and naming conventions on the output:
 				- The output of the time commands should be stored in files whose prefix is the splitting algorithm (blue, cobalt, cluster or random70) and whose suffix is ".times". There should be another file with the same name, but with the suffix ".names" in place of ".times" that contains the names of each family. The i^th set of times in the ".times" file should correspond to the i^th family name in the ".names" file. 
 				- It doesn't matter how many families per .times/.names file pair. Each family should appear in one .times/.names file pair. 
 
@@ -40,7 +40,7 @@ Reproducing analysis of splitting algorithms' runtime
 
 
 	Associated Figures:
-		- To produce Figure 2 and Figure S1 see Jupyter notebook compile_time_results.ipynb
+		- To produce Figure 3 see Jupyter notebook compile_time_results.ipynb
 		- The values in the "seed" and "full" columns of Table 1 are the results of time command described under "Benchmarking runtime on databases." The remaining values in the "max" and "families >1 min" columns are computed in Jupyter notebook compile_time_results.ipynb.
 
 
@@ -66,8 +66,8 @@ Reproducing success benchmarks
 
 
     Associated Figures:
-    	- To produce Figures S4 and S5 see visualize_sizes.ipynb
-    	- To produce Figures 1, S2, and S3 see plot_success.ipynb
+    	- To produce Figures S2 and S3 see visualize_sizes.ipynb
+    	- To produce Figures 1, 2, and S1 see plot_success.ipynb
 
 
 
@@ -94,7 +94,7 @@ Reproducing benchmarks of homology search methods
 
 		The -2 flag controls the maximum pid between any training sequence pair.
 
-		The --pid flag writes the pid between training and test pairs to "<output_prefix>.pid". This flag is unnecessary for benchmarking, but is needed to produce Figure ?C.
+		The --pid flag writes the pid between training and test pairs to "<output_prefix>.pid". This flag is unnecessary for benchmarking, but is needed to produce Figure 4C.
 
 	Step 2: Make databases required by homology search algorithms. 
 	[See make_blast_db.py, make_diamond_db.py, AND HHBLITS TO BE ADDED]
@@ -104,8 +104,6 @@ Reproducing benchmarks of homology search methods
 		Diamond: diamond makedb --in <benchmark-prefix>.fa --db <benchmark-prefix>.fa
 
 		Blast: makeblastdb -in <benchmark-prefix>.fa -dbtype prot
-
-		HHBlits: COMING SOON??
 
 	Step 3: Use profmarks's perl scripts to run homology search algorithms on the synthetic sequences.
 	[See run_hom_methods.py]
@@ -130,13 +128,13 @@ Reproducing benchmarks of homology search methods
 
 		For each split-homology benchmark produced in the previous step:
 
-			1. Concatenate the .out files in found in the corresponding <results-directory>/<method> directory and sort the resulting file, store as <results-directory>/<method>.cat 
+			1. Concatenate the .out files in found in the corresponding <results-directory>/<method> directory and sort the resulting file by e-value, store as <results-directory>/<method>.cat 
 
 			2. Run <path-to-profmark>/rocplot <benchmark-prefix> <results-directory>/<method>.cat and save the results to <results-directory>/<method>.xy
 
 	Associated Figures:
-		- To produce Figure 3B, first run extract_common_successes.py to produce a XMGRACE xydydy file for each splitting algorithm-homology method pair that only includes data from families successfully split by each of Blue1, Cobalt1, Cluster and Independent Selection
-		- To produce Figures 3 and 4 see Jupyter notebook plot_method_benchmarks.ipynb
+		- To produce Figure 4B, first run extract_common_successes.py to produce a XMGRACE xydydy file for each splitting algorithm-homology method pair that only includes data from families successfully split by each of Blue1, Cobalt1, Cluster and Independent Selection
+		- To produce Figures 4 and 5 see Jupyter notebook plot_method_benchmarks.ipynb
 
 
 
