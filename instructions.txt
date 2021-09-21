@@ -97,7 +97,7 @@ Reproducing benchmarks of homology search methods
 		The --pid flag writes the pid between training and test pairs to "<output_prefix>.pid". This flag is unnecessary for benchmarking, but is needed to produce Figure 4C.
 
 	Step 2: Make databases required by homology search algorithms. 
-	[See make_blast_db.py, make_diamond_db.py, AND HHBLITS TO BE ADDED]
+	[See make_blast_db.py, make_diamond_db.py]
 
 		For each split produced in Step 1, make the requisite databases. Set <benchmark-prefix> as what was specified as <output_location/output_prefix> in Step 1.
 
