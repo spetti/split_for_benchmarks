@@ -138,6 +138,6 @@ Reproducing benchmarks of homology search methods
 
 
 Other notes:
-- When using profmark with a multi-MSA or an input database, it is necesary that these files be indexed. The error "Failed to open SSI index file" means that the multi-MSA or input database has not been indexed. To index use the easel commands esl-afetch --index <mutli-MSA> or esl-sfetch --index <unaligned database>
+- When using profmark with a multi-MSA or an input database, it is necessary that these files be indexed. The error "Failed to open SSI index file" means that the multi-MSA or input database has not been indexed. To index use the easel commands esl-afetch --index <mutli-MSA> or esl-sfetch --index <unaligned database>
 
 	
